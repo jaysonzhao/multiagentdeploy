@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101923">
+  <meta name="description" content="Explore the multi-agent loan origination demo architecture and copy example questions for each persona.">
+  <title>Mortgage AI | Demo Architecture</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #14222b;
+      --muted: #5f6f78;
+      --line: #dce4e5;
+      --paper: #f4f7f5;
+      --card: #fff;
+      --deep: #101923;
+      --green: #a6dc69;
+      --mint: #dff4eb;
+      --blue: #dcecff;
+      --amber: #f7e9ce;
+      --violet: #e9e3fa;
+      --rose: #f7e0dc;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.55; }
+    a { color: inherit; }
+    button { font: inherit; }
+    .shell { width: min(1180px, calc(100% - 40px)); margin-inline: auto; }
+    .topbar { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 750; letter-spacing: -.02em; }
+    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: var(--green); color: var(--deep); font-size: 16px; }
+    .nav { display: flex; gap: 24px; align-items: center; color: #53636a; font-size: 13px; font-weight: 650; }
+    .nav a { text-decoration: none; }
+    .nav a:hover { color: #165b47; }
+    .nav .app-link { border: 1px solid #c8d4d2; padding: 8px 12px; border-radius: 999px; color: var(--ink); }
+    .hero { background: var(--deep); color: #f4f7f3; border-radius: 25px; padding: clamp(30px, 6vw, 68px); position: relative; overflow: hidden; }
+    .hero::after { content: ""; position: absolute; width: 420px; height: 420px; border: 1px solid #34424a; border-radius: 50%; right: -100px; top: -190px; box-shadow: 0 0 0 44px #101923, 0 0 0 45px #34424a, 0 0 0 104px #101923, 0 0 0 105px #34424a; opacity: .6; pointer-events: none; }
+    .eyebrow { margin: 0 0 15px; display: flex; align-items: center; gap: 9px; color: var(--green); text-transform: uppercase; letter-spacing: .13em; font-size: 11px; font-weight: 800; }
+    .eyebrow::before { content: ""; width: 20px; height: 1px; background: currentColor; }
+    h1 { max-width: 750px; margin: 0; font-size: clamp(38px, 6.2vw, 72px); line-height: 1.01; letter-spacing: -.055em; font-weight: 680; }
+    .hero-copy { max-width: 630px; margin: 22px 0 0; color: #bec9ca; font-size: clamp(15px, 1.6vw, 18px); }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 30px; }
+    .hero-meta span { border: 1px solid #36454d; border-radius: 99px; color: #dce6e4; padding: 7px 11px; font-size: 12px; }
+    .section { padding: 78px 0 0; scroll-margin-top: 20px; }
+    .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+    .section-kicker { color: #547467; font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; margin: 0 0 8px; }
+    h2 { margin: 0; font-size: clamp(28px, 4vw, 42px); line-height: 1.1; letter-spacing: -.04em; }
+    .section-lede { max-width: 550px; color: var(--muted); margin: 10px 0 0; font-size: 15px; }
+    .architecture-card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 18px; box-shadow: 0 12px 32px #20342c0a; }
+    .diagram-scroll { overflow-x: auto; scrollbar-color: #bdcbc7 transparent; }
+    .diagram { width: 100%; min-width: 850px; height: auto; display: block; }
+    .diagram text { font-family: inherit; }
+    .diagram-caption { display: flex; justify-content: space-between; gap: 20px; color: var(--muted); font-size: 12px; padding: 13px 7px 1px; }
+    .diagram-caption strong { color: var(--ink); }
+    .guardrails { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 15px; }
+    .guardrail { padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .guardrail .n { color: #57806c; font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .guardrail h3 { margin: 8px 0 5px; font-size: 14px; }
+    .guardrail p { margin: 0; font-size: 12px; color: var(--muted); }
+    .personas-section { padding-bottom: 84px; }
+    .role-index { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin: 24px 0 16px; }
+    .role-jump { text-align: left; border: 1px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink); padding: 14px; cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s; }
+    .role-jump:hover { transform: translateY(-2px); border-color: #96b9a8; box-shadow: 0 8px 18px #20342c0c; }
+    .role-jump .role-num { color: #61826f; font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .role-jump strong { display: block; margin-top: 6px; font-size: 14px; }
+    .role-jump small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .persona { background: #fff; border: 1px solid var(--line); border-radius: 19px; margin-top: 13px; overflow: hidden; scroll-margin-top: 18px; }
+    .persona-head { display: flex; align-items: center; gap: 15px; padding: 20px 22px; border-bottom: 1px solid #e8eeee; }
+    .persona-icon { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center; border-radius: 14px; font-size: 18px; }
+    .prospect .persona-icon { background: var(--mint); }
+    .borrower .persona-icon { background: var(--blue); }
+    .officer .persona-icon { background: var(--amber); }
+    .underwriter .persona-icon { background: var(--violet); }
+    .ceo .persona-icon { background: var(--rose); }
+    .persona-title { flex: 1; }
+    .persona-title h3 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .persona-title p { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+    .persona-tags { display: flex; gap: 7px; flex-wrap: wrap; justify-content: end; }
+    .tag { border-radius: 99px; padding: 5px 9px; background: #f1f5f3; color: #52635b; font-size: 10px; font-weight: 750; }
+    .persona-body { padding: 18px 22px 22px; }
+    .question-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .question-toolbar p { margin: 0; color: var(--muted); font-size: 12px; }
+    .copy-all, .copy-one { border: 1px solid #cedbd5; background: #fff; color: #215844; border-radius: 9px; cursor: pointer; font-weight: 700; transition: background .15s, border-color .15s; }
+    .copy-all { padding: 8px 11px; font-size: 11px; white-space: nowrap; }
+    .copy-one { padding: 7px 9px; display: inline-flex; align-items: center; gap: 6px; font-size: 10px; }
+    .copy-all:hover, .copy-one:hover { background: #edf8f1; border-color: #8bb59c; }
+    .questions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .question { display: flex; align-items: center; gap: 12px; min-height: 64px; border: 1px solid #e7edeb; border-radius: 12px; padding: 11px 12px 11px 15px; }
+    .question p { flex: 1; margin: 0; font-size: 13px; line-height: 1.4; }
+    .question .q-mark { color: #83a694; font: 700 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .copy-status { position: fixed; bottom: 18px; left: 50%; transform: translate(-50%, 15px); opacity: 0; pointer-events: none; z-index: 5; background: var(--deep); color: #fff; border-radius: 999px; padding: 10px 15px; box-shadow: 0 8px 25px #07120d35; font-size: 12px; transition: opacity .2s, transform .2s; }
+    .copy-status.show { opacity: 1; transform: translate(-50%, 0); }
+    footer { background: #eaf0ed; padding: 24px 0; color: #63716d; font-size: 11px; }
+    .footer-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; }
+    footer a { text-underline-offset: 3px; }
+    @media (max-width: 800px) {
+      .guardrails { grid-template-columns: repeat(2, 1fr); }
+      .role-index { grid-template-columns: repeat(3, 1fr); }
+      .section-heading { align-items: start; flex-direction: column; }
+      .persona-head { flex-wrap: wrap; }
+      .persona-tags { width: 100%; justify-content: start; padding-left: 59px; }
+    }
+    @media (max-width: 540px) {
+      .shell { width: min(100% - 24px, 1180px); }
+      .topbar { height: 60px; }
+      .nav { gap: 13px; font-size: 11px; }
+      .nav a:nth-child(2) { display: none; }
+      .hero { border-radius: 18px; padding: 32px 23px; }
+      .section { padding-top: 58px; }
+      .architecture-card { padding: 9px; border-radius: 14px; }
+      .diagram-caption { flex-direction: column; gap: 4px; }
+      .guardrails { gap: 8px; }
+      .guardrail { padding: 13px; }
+      .role-index { grid-template-columns: repeat(2, 1fr); }
+      .persona-head { padding: 16px; }
+      .persona-body { padding: 14px 15px 17px; }
+      .persona-tags { padding-left: 0; }
+      .questions { grid-template-columns: 1fr; }
+      .question { min-height: 58px; }
+      .footer-inner { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="shell topbar">
+    <a class="brand" href="#top" aria-label="Mortgage AI architecture guide home"><span class="brand-mark">M</span><span>Mortgage AI <span style="font-weight:450;color:#718078">/ Field guide</span></span></a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="#architecture">Architecture</a>
+      <a href="#personas">Personas &amp; prompts</a>
+      <a class="app-link" href="https://mortgage-ai-multi-agent-loan-origination.apps.cluster-v4vsc.v4vsc.sandbox287.opentlc.com/" target="_blank" rel="noreferrer">Open demo ↗</a>
+    </nav>
+  </header>
+
+  <main id="top" class="shell">
+    <section class="hero" aria-labelledby="page-title">
+      <p class="eyebrow">Multi-agent loan origination · demo guide</p>
+      <h1 id="page-title">One lending journey.<br>Five focused assistants.</h1>
+      <p class="hero-copy">A guided map of the demo system, its trust boundaries, and the questions that make each role come alive. Use the prompts to explore the mortgage lifecycle from first inquiry to portfolio review.</p>
+      <div class="hero-meta"><span>5 role-scoped agents</span><span>34 sample questions</span><span>gpt-oss-20b · MaaS · MLflow</span></div>
+    </section>
+
+    <section id="architecture" class="section" aria-labelledby="architecture-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">01 / System map</p><h2 id="architecture-title">How the demo fits together</h2><p class="section-lede">The browser talks to a React UI, which uses a FastAPI service for application workflows and live agent conversations. The API coordinates role-aware LangGraph agents with model, identity, storage, and observability services.</p></div>
+      </div>
+      <div class="architecture-card">
+        <div class="diagram-scroll" tabindex="0" aria-label="Scrollable architecture diagram">
+          <svg class="diagram" viewBox="0 0 1120 470" role="img" aria-labelledby="diagram-title diagram-desc">
+            <title id="diagram-title">Multi-agent loan origination demo architecture</title>
+            <desc id="diagram-desc">Browser connects over HTTPS and WebSocket to a React and Vite interface. The interface calls a FastAPI backend over HTTP and WebSocket on port 8000. The API hosts JWT, PII and CORS middleware, REST and chat routes, and five LangGraph agents. In this deployment it connects to OpenShift AI MaaS with gpt-oss-20b and OpenShift AI MLflow, plus Keycloak, an MCP risk server, PostgreSQL with pgvector, and MinIO.</desc>
+            <defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#739887"/></marker></defs>
+            <rect x="14" y="18" width="1092" height="434" rx="17" fill="#f8faf8"/>
+            <text x="36" y="51" fill="#71827b" font-size="11" font-weight="750" letter-spacing="1.5">CLIENT</text>
+            <text x="244" y="51" fill="#71827b" font-size="11" font-weight="750" letter-spacing="1.5">EXPERIENCE</text>
+            <text x="514" y="51" fill="#71827b" font-size="11" font-weight="750" letter-spacing="1.5">APPLICATION API</text>
+            <text x="892" y="51" fill="#71827b" font-size="11" font-weight="750" letter-spacing="1.5">CONNECTED SERVICES</text>
+
+            <path d="M184 225H235" fill="none" stroke="#739887" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="209" y="208" text-anchor="middle" fill="#65756e" font-size="8">HTTPS / WS</text>
+            <path d="M455 225H505" fill="none" stroke="#739887" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="480" y="208" text-anchor="middle" fill="#65756e" font-size="8">HTTP / WS</text>
+            <path d="M840 245H876" fill="none" stroke="#739887" stroke-width="2" marker-end="url(#arrow)"/>
+
+            <rect x="36" y="173" width="148" height="104" rx="14" fill="#fff" stroke="#d8e3df" stroke-width="1.5"/>
+            <circle cx="62" cy="201" r="9" fill="#dff4eb"/><circle cx="62" cy="201" r="3" fill="#3c755d"/>
+            <text x="55" y="232" fill="#16252c" font-size="15" font-weight="750">Browser</text>
+            <text x="55" y="252" fill="#6a7b74" font-size="11">Five role experiences</text>
+
+            <rect x="240" y="153" width="215" height="144" rx="14" fill="#eaf3ef" stroke="#c9ddd2" stroke-width="1.5"/>
+            <text x="259" y="181" fill="#2b694f" font-size="10" font-weight="800" letter-spacing="1">UI PACKAGE</text>
+            <text x="259" y="211" fill="#16252c" font-size="18" font-weight="750">React + Vite</text>
+            <text x="259" y="235" fill="#52665d" font-size="12">TanStack Router</text>
+            <text x="259" y="254" fill="#52665d" font-size="12">TanStack Query · Tailwind</text>
+            <text x="259" y="275" fill="#71827b" font-size="10">Routes pages and streams chat</text>
+
+            <rect x="510" y="85" width="330" height="323" rx="16" fill="#14232b"/>
+            <text x="533" y="116" fill="#a6dc69" font-size="10" font-weight="800" letter-spacing="1.3">API PACKAGE · FASTAPI</text>
+            <text x="533" y="142" fill="#f5f7f3" font-size="18" font-weight="750">Routes + trust controls</text>
+            <rect x="530" y="159" width="290" height="50" rx="9" fill="#263841"/>
+            <text x="546" y="180" fill="#e9f0ec" font-size="12" font-weight="700">Middleware</text>
+            <text x="546" y="197" fill="#b9c9c3" font-size="10">JWT validation · PII masking · CORS</text>
+            <rect x="530" y="219" width="290" height="49" rx="9" fill="#263841"/>
+            <text x="546" y="240" fill="#e9f0ec" font-size="12" font-weight="700">REST + WebSocket endpoints</text>
+            <text x="546" y="257" fill="#b9c9c3" font-size="10">Applications · analytics · persona chats</text>
+            <rect x="530" y="278" width="290" height="109" rx="9" fill="#315344"/>
+            <text x="546" y="301" fill="#e6f5dd" font-size="12" font-weight="750">LangGraph agent system</text>
+            <text x="546" y="321" fill="#d5e7dc" font-size="10">YAML registry · intent router · tool auth</text>
+            <rect x="546" y="335" width="62" height="21" rx="7" fill="#a6dc69"/><text x="577" y="349" text-anchor="middle" fill="#13241a" font-size="8" font-weight="800">PROSPECT</text>
+            <rect x="614" y="335" width="66" height="21" rx="7" fill="#a6dc69"/><text x="647" y="349" text-anchor="middle" fill="#13241a" font-size="8" font-weight="800">BORROWER</text>
+            <rect x="686" y="335" width="112" height="21" rx="7" fill="#a6dc69"/><text x="742" y="349" text-anchor="middle" fill="#13241a" font-size="8" font-weight="800">LOAN OFFICER</text>
+            <rect x="546" y="361" width="90" height="21" rx="7" fill="#a6dc69"/><text x="591" y="375" text-anchor="middle" fill="#13241a" font-size="8" font-weight="800">UNDERWRITER</text>
+            <rect x="642" y="361" width="45" height="21" rx="7" fill="#a6dc69"/><text x="664.5" y="375" text-anchor="middle" fill="#13241a" font-size="8" font-weight="800">CEO</text>
+
+            <rect x="892" y="70" width="190" height="56" rx="10" fill="#fff" stroke="#d8e3df"/>
+            <circle cx="913" cy="98" r="7" fill="#dcecff"/><text x="930" y="94" fill="#18272d" font-size="12" font-weight="750">Keycloak</text><text x="930" y="111" fill="#718079" font-size="10">OIDC identity · JWT</text>
+            <rect x="892" y="137" width="190" height="56" rx="10" fill="#fff" stroke="#d8e3df"/>
+            <circle cx="913" cy="165" r="7" fill="#dff4eb"/><text x="930" y="161" fill="#18272d" font-size="12" font-weight="750">OpenShift AI MaaS</text><text x="930" y="178" fill="#718079" font-size="10">gpt-oss-20b · OpenAI API</text>
+            <rect x="892" y="204" width="190" height="56" rx="10" fill="#fff" stroke="#d8e3df"/>
+            <circle cx="913" cy="232" r="7" fill="#e9e3fa"/><text x="930" y="228" fill="#18272d" font-size="12" font-weight="750">OpenShift AI MLflow</text><text x="930" y="245" fill="#718079" font-size="10">Agent traces · evaluations</text>
+            <rect x="892" y="271" width="190" height="56" rx="10" fill="#fff" stroke="#d8e3df"/>
+            <circle cx="913" cy="299" r="7" fill="#f7e9ce"/><text x="930" y="295" fill="#18272d" font-size="12" font-weight="750">MCP risk server</text><text x="930" y="312" fill="#718079" font-size="10">Predictive model tools</text>
+            <rect x="892" y="338" width="190" height="56" rx="10" fill="#fff" stroke="#d8e3df"/>
+            <circle cx="913" cy="366" r="7" fill="#dcecff"/><text x="930" y="362" fill="#18272d" font-size="12" font-weight="750">PostgreSQL + pgvector</text><text x="930" y="379" fill="#718079" font-size="10">Workflow data · compliance KB</text>
+            <text x="893" y="424" fill="#718079" font-size="10">MinIO stores uploaded documents</text>
+            <text x="892" y="446" fill="#84928c" font-size="9">The deployment can connect to managed platform services.</text>
+          </svg>
+        </div>
+        <div class="diagram-caption"><span><strong>Conversation path:</strong> Browser → UI → API → role-scoped agent → tools and services.</span><span>Scroll horizontally on smaller screens.</span></div>
+      </div>
+      <div class="guardrails" aria-label="Architecture safeguards">
+        <article class="guardrail"><span class="n">01 / ACCESS</span><h3>Three RBAC layers</h3><p>Route checks, data scope filters, and per-tool authorization reinforce role boundaries.</p></article>
+        <article class="guardrail"><span class="n">02 / FAIR LENDING</span><h3>HMDA data isolation</h3><p>Demographic records use a separate schema and compliance access path; lending agents cannot query them.</p></article>
+        <article class="guardrail"><span class="n">03 / PRIVACY</span><h3>PII masking</h3><p>CEO views mask sensitive identifiers while retaining operational summaries.</p></article>
+        <article class="guardrail"><span class="n">04 / AUDIT</span><h3>Hash-chained events</h3><p>Agent actions and human decisions are recorded in an append-only audit trail.</p></article>
+      </div>
+    </section>
+
+    <section id="personas" class="section personas-section" aria-labelledby="personas-title">
+      <div class="section-heading">
+        <div><p class="section-kicker">02 / Demo prompts</p><h2 id="personas-title">Explore the roles</h2><p class="section-lede">Each assistant receives tools and data access shaped for its part of the lending journey. Copy one prompt to try it, or copy the full set for a persona.</p></div>
+      </div>
+      <nav class="role-index" aria-label="Jump to a persona">
+        <a class="role-jump" href="#prospect"><span class="role-num">01</span><strong>Prospect</strong><small>Public discovery · 4 prompts</small></a>
+        <a class="role-jump" href="#borrower"><span class="role-num">02</span><strong>Borrower</strong><small>Application · 5 prompts</small></a>
+        <a class="role-jump" href="#loan-officer"><span class="role-num">03</span><strong>Loan Officer</strong><small>Pipeline · 8 prompts</small></a>
+        <a class="role-jump" href="#underwriter"><span class="role-num">04</span><strong>Underwriter</strong><small>Review · 10 prompts</small></a>
+        <a class="role-jump" href="#ceo"><span class="role-num">05</span><strong>CEO</strong><small>Analytics · 7 prompts</small></a>
+      </nav>
+
+      <article class="persona prospect" id="prospect">
+        <header class="persona-head"><div class="persona-icon" aria-hidden="true">⌂</div><div class="persona-title"><h3>Prospect</h3><p>Anonymous visitor exploring mortgage options</p></div><div class="persona-tags"><span class="tag">No sign-in</span><span class="tag">Products · affordability</span></div></header>
+        <div class="persona-body"><div class="question-toolbar"><p>Public Assistant · 4 example questions</p><button class="copy-all" type="button" data-copy-all="prospect">Copy all questions</button></div><div class="questions">
+          <div class="question"><span class="q-mark">Q1</span><p>What mortgage products do you offer?</p><button class="copy-one" type="button" data-copy="What mortgage products do you offer?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q2</span><p>How much house can I afford with $80,000 income?</p><button class="copy-one" type="button" data-copy="How much house can I afford with $80,000 income?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q3</span><p>What's the process for getting pre-qualified?</p><button class="copy-one" type="button" data-copy="What's the process for getting pre-qualified?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q4</span><p>What about your competitor's rates?</p><button class="copy-one" type="button" data-copy="What about your competitor's rates?" aria-label="Copy question">▢ Copy</button></div>
+        </div></div>
+      </article>
+
+      <article class="persona borrower" id="borrower">
+        <header class="persona-head"><div class="persona-icon" aria-hidden="true">◉</div><div class="persona-title"><h3>Borrower</h3><p>Authenticated customer applying for a loan</p></div><div class="persona-tags"><span class="tag">Sign-in required</span><span class="tag">Own application data</span></div></header>
+        <div class="persona-body"><div class="question-toolbar"><p>Borrower Assistant · 5 example questions</p><button class="copy-all" type="button" data-copy-all="borrower">Copy all questions</button></div><div class="questions">
+          <div class="question"><span class="q-mark">Q1</span><p>I'd like to start an application for a $400,000 loan.</p><button class="copy-one" type="button" data-copy="I'd like to start an application for a $400,000 loan." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q2</span><p>Here's my W-2 [uploads file]</p><button class="copy-one" type="button" data-copy="Here's my W-2 [uploads file]" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q3</span><p>What documents do I still need to provide?</p><button class="copy-one" type="button" data-copy="What documents do I still need to provide?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q4</span><p>What stage is my application in?</p><button class="copy-one" type="button" data-copy="What stage is my application in?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q5</span><p>The underwriter asked for proof of down payment funds.</p><button class="copy-one" type="button" data-copy="The underwriter asked for proof of down payment funds." aria-label="Copy question">▢ Copy</button></div>
+        </div></div>
+      </article>
+
+      <article class="persona officer" id="loan-officer">
+        <header class="persona-head"><div class="persona-icon" aria-hidden="true">▤</div><div class="persona-title"><h3>Loan Officer</h3><p>Internal staff managing a pipeline of applications</p></div><div class="persona-tags"><span class="tag">Staff role</span><span class="tag">Assigned pipeline</span></div></header>
+        <div class="persona-body"><div class="question-toolbar"><p>Loan Officer Assistant · 8 example questions</p><button class="copy-all" type="button" data-copy-all="loan-officer">Copy all questions</button></div><div class="questions">
+          <div class="question"><span class="q-mark">Q1</span><p>Show me my pipeline.</p><button class="copy-one" type="button" data-copy="Show me my pipeline." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q2</span><p>What's the status of application #1234?</p><button class="copy-one" type="button" data-copy="What's the status of application #1234?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q3</span><p>Are all documents present for #1234?</p><button class="copy-one" type="button" data-copy="Are all documents present for #1234?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q4</span><p>Pull credit for #1234.</p><button class="copy-one" type="button" data-copy="Pull credit for #1234." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q5</span><p>Is this application ready for underwriting?</p><button class="copy-one" type="button" data-copy="Is this application ready for underwriting?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q6</span><p>Submit #1234 to underwriting.</p><button class="copy-one" type="button" data-copy="Submit #1234 to underwriting." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q7</span><p>Draft a message asking for updated paystubs.</p><button class="copy-one" type="button" data-copy="Draft a message asking for updated paystubs." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q8</span><p>What's the ATR rule for debt-to-income?</p><button class="copy-one" type="button" data-copy="What's the ATR rule for debt-to-income?" aria-label="Copy question">▢ Copy</button></div>
+        </div></div>
+      </article>
+
+      <article class="persona underwriter" id="underwriter">
+        <header class="persona-head"><div class="persona-icon" aria-hidden="true">⌕</div><div class="persona-title"><h3>Underwriter</h3><p>Reviews applications and renders lending decisions</p></div><div class="persona-tags"><span class="tag">Staff role</span><span class="tag">Risk · compliance · conditions</span></div></header>
+        <div class="persona-body"><div class="question-toolbar"><p>Underwriter Assistant · 10 example questions</p><button class="copy-all" type="button" data-copy-all="underwriter">Copy all questions</button></div><div class="questions">
+          <div class="question"><span class="q-mark">Q1</span><p>Show me the underwriting queue.</p><button class="copy-one" type="button" data-copy="Show me the underwriting queue." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q2</span><p>What's the risk profile for application #1234?</p><button class="copy-one" type="button" data-copy="What's the risk profile for application #1234?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q3</span><p>What's your preliminary recommendation for #1234?</p><button class="copy-one" type="button" data-copy="What's your preliminary recommendation for #1234?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q4</span><p>Run compliance checks for #1234.</p><button class="copy-one" type="button" data-copy="Run compliance checks for #1234." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q5</span><p>What's the TRID 3-day rule for closing disclosure?</p><button class="copy-one" type="button" data-copy="What's the TRID 3-day rule for closing disclosure?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q6</span><p>Issue a condition requesting updated bank statements.</p><button class="copy-one" type="button" data-copy="Issue a condition requesting updated bank statements." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q7</span><p>Has the borrower responded to condition #567?</p><button class="copy-one" type="button" data-copy="Has the borrower responded to condition #567?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q8</span><p>Clear condition #567.</p><button class="copy-one" type="button" data-copy="Clear condition #567." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q9</span><p>Approve application #1234.</p><button class="copy-one" type="button" data-copy="Approve application #1234." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q10</span><p>Deny application #1234 due to high DTI.</p><button class="copy-one" type="button" data-copy="Deny application #1234 due to high DTI." aria-label="Copy question">▢ Copy</button></div>
+        </div></div>
+      </article>
+
+      <article class="persona ceo" id="ceo">
+        <header class="persona-head"><div class="persona-icon" aria-hidden="true">◴</div><div class="persona-title"><h3>CEO</h3><p>Executive dashboard for portfolio analytics and audit</p></div><div class="persona-tags"><span class="tag">Executive role</span><span class="tag">Read-only · PII masked</span></div></header>
+        <div class="persona-body"><div class="question-toolbar"><p>CEO Assistant · 7 example questions</p><button class="copy-all" type="button" data-copy-all="ceo">Copy all questions</button></div><div class="questions">
+          <div class="question"><span class="q-mark">Q1</span><p>What's our approval rate this quarter?</p><button class="copy-one" type="button" data-copy="What's our approval rate this quarter?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q2</span><p>Show me denial trends over the last 6 months.</p><button class="copy-one" type="button" data-copy="Show me denial trends over the last 6 months." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q3</span><p>How is Maria Chen performing?</p><button class="copy-one" type="button" data-copy="How is Maria Chen performing?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q4</span><p>What's the audit trail for application #1234?</p><button class="copy-one" type="button" data-copy="What's the audit trail for application #1234?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q5</span><p>Show me the decision rationale for application #1234.</p><button class="copy-one" type="button" data-copy="Show me the decision rationale for application #1234." aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q6</span><p>What's our average LLM latency this week?</p><button class="copy-one" type="button" data-copy="What's our average LLM latency this week?" aria-label="Copy question">▢ Copy</button></div>
+          <div class="question"><span class="q-mark">Q7</span><p>Are we routing too many queries to the expensive model?</p><button class="copy-one" type="button" data-copy="Are we routing too many queries to the expensive model?" aria-label="Copy question">▢ Copy</button></div>
+        </div></div>
+      </article>
+    </section>
+  </main>
+
+  <div class="copy-status" role="status" aria-live="polite"></div>
+  <footer><div class="shell footer-inner"><span>Architecture summary and sample interactions from the project documentation.</span><span><a href="https://github.com/rh-ai-quickstart/multi-agent-loan-origination/blob/main/docs/architecture.md" target="_blank" rel="noreferrer">Architecture source</a> · <a href="https://github.com/rh-ai-quickstart/multi-agent-loan-origination/blob/main/docs/personas.md" target="_blank" rel="noreferrer">Personas source</a></span></div></footer>
+  <script>
+    const status = document.querySelector('.copy-status');
+    let statusTimer;
+    async function copyText(text, label) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const field = document.createElement('textarea');
+          field.value = text;
+          field.setAttribute('readonly', '');
+          field.style.position = 'fixed';
+          field.style.opacity = '0';
+          document.body.appendChild(field);
+          field.select();
+          document.execCommand('copy');
+          field.remove();
+        }
+        status.textContent = `${label} copied to clipboard`;
+        status.classList.add('show');
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => status.classList.remove('show'), 2200);
+      } catch (_) {
+        status.textContent = 'Clipboard access was blocked by the browser';
+        status.classList.add('show');
+        clearTimeout(statusTimer);
+        statusTimer = setTimeout(() => status.classList.remove('show'), 2600);
+      }
+    }
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', () => copyText(button.dataset.copy, 'Question'));
+    });
+    document.querySelectorAll('[data-copy-all]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const article = button.closest('.persona');
+        const questions = [...article.querySelectorAll('[data-copy]')].map((item) => item.dataset.copy);
+        copyText(questions.join('\n'), `${article.querySelector('h3').textContent} questions`);
+      });
+    });
+  </script>
+</body>
+</html>

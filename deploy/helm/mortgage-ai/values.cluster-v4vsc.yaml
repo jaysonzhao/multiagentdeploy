@@ -1,0 +1,33 @@
+# Non-secret values for the cluster-v4vsc deployment.
+# Create the maas-credentials Secret in the target project before installing.
+llm:
+  existingSecret:
+    name: maas-credentials
+    key: api-key
+
+secrets:
+  LLM_BASE_URL: https://maas.apps.cluster-v4vsc.v4vsc.sandbox287.opentlc.com/v1
+  LLM_MODEL: publishers/llm/models/gpt-oss-20b
+  MLFLOW_TRACKING_URI: https://mlflow.redhat-ods-applications.svc.cluster.local:8443/mlflow
+  MLFLOW_EXPERIMENT_NAME: multi-agent-loan-origination
+  MLFLOW_WORKSPACE: multi-agent-loan-origination
+  MLFLOW_TRACKING_INSECURE_TLS: "false"
+
+routes:
+  sharedHost: mortgage-ai-multi-agent-loan-origination.apps.cluster-v4vsc.v4vsc.sandbox287.opentlc.com
+
+mlflow:
+  serviceCA:
+    enabled: true
+  rbac:
+    enabled: true
+    existingClusterRole: mlflow-operator-mlflow-integration
+
+mcpWeatherServer:
+  enabled: false
+
+# The upstream minio/minio:latest image is no longer pullable on this cluster.
+minio:
+  image:
+    repository: docker.io/bitnamilegacy/minio
+    tag: 2025.7.23-debian-12-r5

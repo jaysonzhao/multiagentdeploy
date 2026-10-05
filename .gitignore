@@ -1,0 +1,12 @@
+# Local credentials and per-cluster secret values
+.env
+.env.*
+!.env.example
+**/values.local.yaml
+**/values.secret.yaml
+**/secrets*.yaml
+
+# Local operating-system and editor files
+.DS_Store
+.idea/
+.vscode/

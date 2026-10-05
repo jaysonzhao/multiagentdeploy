@@ -1,0 +1,11 @@
+{{- if .Values.mlflow.serviceCA.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mortgage-ai.fullname" . }}-mlflow-service-ca
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  labels:
+    {{- include "mortgage-ai.labels" . | nindent 4 }}
+{{- end }}
